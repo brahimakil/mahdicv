@@ -208,7 +208,7 @@ function initializeAnimations() {
     // Contact form handling
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             // Get form data
@@ -217,15 +217,34 @@ function initializeAnimations() {
             const email = formData.get('email');
             const subject = formData.get('subject');
             const message = formData.get('message');
+            const phone = formData.get('phone') || '';
 
-            // Create mailto link
-            const mailtoLink = `mailto:mahdikandil4@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`)}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
-            
-            // Show success message
-            showNotification('Thank you for your message! Your email client should open now.', 'success');
+            // Send to backend API
+            try {
+                const response = await fetch('https://molotov-backend.vercel.app/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        subject: subject,
+                        description: message,
+                        phone: phone, // Use the actual phone value from form
+                        selectedDate: '' // Optional field, can be empty
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('Thank you for your message! I will get back to you soon.', 'success');
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showNotification('Sorry, there was an error sending your message. Please try again.', 'error');
+            }
             
             // Reset form
             contactForm.reset();
