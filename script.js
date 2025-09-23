@@ -481,50 +481,49 @@ function initializeContactForm() {
 function initializeOtherFeatures() {
     // All other non-media features can be initialized immediately
     // This includes animations, scroll effects, etc.
+    
+    // Add CSS for mobile navigation
+    const style = document.createElement('style');
+    style.textContent = `
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background: var(--warm-faded-highlight);
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                padding-top: 50px;
+                transition: left 0.3s ease;
+                z-index: 999;
+            }
+            
+            .nav-menu.active {
+                left: 0;
+            }
+            
+            .nav-menu li {
+                margin: 20px 0;
+            }
+            
+            .nav-toggle.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            
+            .nav-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .nav-toggle.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
-
-// Add CSS for mobile navigation
-const style = document.createElement('style');
-style.textContent = `
-    @media (max-width: 768px) {
-        .nav-menu {
-            position: fixed;
-            top: 70px;
-            left: -100%;
-            width: 100%;
-            height: calc(100vh - 70px);
-            background: var(--warm-faded-highlight);
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            padding-top: 50px;
-            transition: left 0.3s ease;
-            z-index: 999;
-        }
-        
-        .nav-menu.active {
-            left: 0;
-        }
-        
-        .nav-menu li {
-            margin: 20px 0;
-        }
-        
-        .nav-toggle.active span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        
-        .nav-toggle.active span:nth-child(2) {
-            opacity: 0;
-        }
-        
-        .nav-toggle.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-    }
-`;
-document.head.appendChild(style);
-});
 
 // Error handling
 window.addEventListener('error', (e) => {
