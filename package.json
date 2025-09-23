@@ -1,0 +1,24 @@
+{
+  "name": "mahdi-kandyl-cv",
+  "version": "1.0.0",
+  "description": "Professional CV website for Mahdi Kandyl - Award-winning Director & Producer",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite preview --port 3000"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "cv",
+    "portfolio",
+    "filmmaker",
+    "director",
+    "producer"
+  ],
+  "author": "Mahdi Kandyl",
+  "license": "MIT"
+}
