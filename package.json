@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Professional CV website for Mahdi Kandyl - Award-winning Director & Producer",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
