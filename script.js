@@ -30,73 +30,135 @@ const loadingScreen = document.getElementById('loadingScreen');
 let loadedAssets = 0;
 const totalAssets = Object.keys(mediaFiles).length;
 
+// Replace the updateLoadingProgress function with this simpler version
 function updateLoadingProgress() {
-    loadedAssets++;
-    if (loadedAssets >= totalAssets) {
-        setTimeout(() => {
-            loadingScreen.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            initializeAnimations();
-        }, 500);
-    }
+    // This function is no longer needed since we're not tracking multiple assets
+    // The loading screen will be hidden as soon as the profile image loads
 }
 
 // Function to load media from Firebase Storage
+// Replace the existing loadMediaFromFirebase function with this optimized version
+
 async function loadMediaFromFirebase() {
     try {
-        // Load profile image
+        // Only load the profile image initially for fast loading
         const profileImageRef = ref(storage, mediaFiles.profileImage);
         const profileImageUrl = await getDownloadURL(profileImageRef);
         const profileImg = document.getElementById('profileImage');
         profileImg.src = profileImageUrl;
-        profileImg.onload = updateLoadingProgress;
-        profileImg.onerror = () => {
-            console.error('Failed to load profile image');
-            updateLoadingProgress();
-        };
-
-        // Load hero image 1
-        const heroImage1Ref = ref(storage, mediaFiles.heroImage1);
-        const heroImage1Url = await getDownloadURL(heroImage1Ref);
-        const heroImg1 = document.getElementById('heroImage1');
-        heroImg1.src = heroImage1Url;
-        heroImg1.onload = updateLoadingProgress;
-        heroImg1.onerror = () => {
-            console.error('Failed to load hero image 1');
-            updateLoadingProgress();
-        };
-
-        // Load hero image 2
-        const heroImage2Ref = ref(storage, mediaFiles.heroImage2);
-        const heroImage2Url = await getDownloadURL(heroImage2Ref);
-        const heroImg2 = document.getElementById('heroImage2');
-        heroImg2.src = heroImage2Url;
-        heroImg2.onload = updateLoadingProgress;
-        heroImg2.onerror = () => {
-            console.error('Failed to load hero image 2');
-            updateLoadingProgress();
-        };
-
-        // Load profile video
-        const profileVideoRef = ref(storage, mediaFiles.profileVideo);
-        const profileVideoUrl = await getDownloadURL(profileVideoRef);
-        const profileVideo = document.getElementById('profileVideo');
-        profileVideo.src = profileVideoUrl;
-        profileVideo.poster = heroImage1Url; // Use first hero image as poster
-        profileVideo.onloadeddata = updateLoadingProgress;
-        profileVideo.onerror = () => {
-            console.error('Failed to load profile video');
-            updateLoadingProgress();
-        };
-
-    } catch (error) {
-        console.error('Error loading media from Firebase:', error);
-        // Hide loading screen even if there's an error
-        setTimeout(() => {
+        
+        // Hide loading screen immediately after profile image loads
+        profileImg.onload = () => {
             loadingScreen.classList.add('hidden');
             document.body.style.overflow = 'auto';
             initializeAnimations();
-        }, 1000);
+            
+            // Load other images lazily in the background
+            loadOtherImagesLazily();
+        };
+        
+        profileImg.onerror = () => {
+            console.error('Failed to load profile image');
+            // Still hide loading screen even if profile image fails
+            loadingScreen.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            initializeAnimations();
+            loadOtherImagesLazily();
+        };
+
+    } catch (error) {
+        console.error('Error loading profile image from Firebase:', error);
+        // Hide loading screen even if there's an error
+        loadingScreen.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        initializeAnimations();
+    }
+}
+
+// Load other images in the background after the site is already visible
+async function loadOtherImagesLazily() {
+    try {
+        // Load hero images in background
+        const heroImage1Ref = ref(storage, mediaFiles.heroImage1);
+        const heroImage1Url = await getDownloadURL(heroImage1Ref);
+        const heroImg1 = document.getElementById('heroImage1');
+        if (heroImg1) {
+            heroImg1.src = heroImage1Url;
+        }
+
+        const heroImage2Ref = ref(storage, mediaFiles.heroImage2);
+        const heroImage2Url = await getDownloadURL(heroImage2Ref);
+        const heroImg2 = document.getElementById('heroImage2');
+        if (heroImg2) {
+            heroImg2.src = heroImage2Url;
+        }
+
+        // Set up video to load only when clicked
+        setupVideoLazyLoading(heroImage1Url);
+
+    } catch (error) {
+        console.error('Error loading additional media:', error);
+    }
+}
+
+// Setup video to load only when user clicks on it
+async function setupVideoLazyLoading(posterUrl) {
+    const videoContainer = document.querySelector('.video-container');
+    const video = document.getElementById('profileVideo');
+    const videoOverlay = document.querySelector('.video-overlay');
+
+    if (video && videoOverlay) {
+        // Set poster image
+        video.poster = posterUrl;
+        
+        // Load video only when user clicks
+        let videoLoaded = false;
+        
+        const loadVideo = async () => {
+            if (!videoLoaded) {
+                try {
+                    const profileVideoRef = ref(storage, mediaFiles.profileVideo);
+                    const profileVideoUrl = await getDownloadURL(profileVideoRef);
+                    video.src = profileVideoUrl;
+                    videoLoaded = true;
+                    
+                    // Show loading indicator
+                    videoOverlay.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    
+                    video.onloadeddata = () => {
+                        videoOverlay.innerHTML = '<i class="fas fa-play"></i>';
+                        video.play();
+                        videoOverlay.style.opacity = '0';
+                    };
+                } catch (error) {
+                    console.error('Error loading video:', error);
+                    videoOverlay.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                }
+            } else {
+                video.play();
+                videoOverlay.style.opacity = '0';
+            }
+        };
+
+        videoOverlay.addEventListener('click', loadVideo);
+        video.addEventListener('click', () => {
+            if (videoLoaded) {
+                if (video.paused) {
+                    video.play();
+                    videoOverlay.style.opacity = '0';
+                } else {
+                    video.pause();
+                    videoOverlay.style.opacity = '1';
+                }
+            } else {
+                loadVideo();
+            }
+        });
+
+        video.addEventListener('ended', () => {
+            videoOverlay.style.opacity = '1';
+            videoOverlay.innerHTML = '<i class="fas fa-play"></i>';
+        });
     }
 }
 
@@ -360,57 +422,108 @@ function optimizeImages() {
 }
 
 // Initialize everything when DOM is loaded
+// Replace the DOMContentLoaded section
 document.addEventListener('DOMContentLoaded', () => {
-    // Hide body overflow during loading
-    document.body.style.overflow = 'hidden';
-    
-    // Load media from Firebase
+    // Start loading only the profile image immediately
     loadMediaFromFirebase();
     
-    // Optimize images
-    optimizeImages();
-    
-    // Add CSS for mobile navigation
-    const style = document.createElement('style');
-    style.textContent = `
-        @media (max-width: 768px) {
-            .nav-menu {
-                position: fixed;
-                top: 70px;
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 70px);
-                background: var(--warm-faded-highlight);
-                flex-direction: column;
-                justify-content: flex-start;
-                align-items: center;
-                padding-top: 50px;
-                transition: left 0.3s ease;
-                z-index: 999;
+    // Initialize contact form and other non-media functionality
+    initializeContactForm();
+    initializeOtherFeatures();
+});
+
+function initializeContactForm() {
+    // Contact form handling
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(contactForm);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const phone = formData.get('phone') || '';
+            const subject = formData.get('subject');
+            const message = formData.get('message');
+
+            try {
+                const response = await fetch('https://molotov-backend.vercel.app/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        subject: subject,
+                        description: message,
+                        phone: phone,
+                        selectedDate: ''
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('Thank you for your message! I will get back to you soon.', 'success');
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showNotification('Sorry, there was an error sending your message. Please try again.', 'error');
             }
             
-            .nav-menu.active {
-                left: 0;
-            }
-            
-            .nav-menu li {
-                margin: 20px 0;
-            }
-            
-            .nav-toggle.active span:nth-child(1) {
-                transform: rotate(45deg) translate(5px, 5px);
-            }
-            
-            .nav-toggle.active span:nth-child(2) {
-                opacity: 0;
-            }
-            
-            .nav-toggle.active span:nth-child(3) {
-                transform: rotate(-45deg) translate(7px, -6px);
-            }
+            contactForm.reset();
+        });
+    }
+}
+
+function initializeOtherFeatures() {
+    // All other non-media features can be initialized immediately
+    // This includes animations, scroll effects, etc.
+}
+
+// Add CSS for mobile navigation
+const style = document.createElement('style');
+style.textContent = `
+    @media (max-width: 768px) {
+        .nav-menu {
+            position: fixed;
+            top: 70px;
+            left: -100%;
+            width: 100%;
+            height: calc(100vh - 70px);
+            background: var(--warm-faded-highlight);
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 50px;
+            transition: left 0.3s ease;
+            z-index: 999;
         }
-    `;
-    document.head.appendChild(style);
+        
+        .nav-menu.active {
+            left: 0;
+        }
+        
+        .nav-menu li {
+            margin: 20px 0;
+        }
+        
+        .nav-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .nav-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .nav-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+    }
+`;
+document.head.appendChild(style);
 });
 
 // Error handling
