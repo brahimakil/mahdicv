@@ -20,7 +20,7 @@ const storage = getStorage(app);
 // Media file references
 const mediaFiles = {
     profileImage: 'mahdicv/mahdi.jpg',
-    heroImage1: 'mahdicv/mahdi1.jpg',
+    heroVideo1: 'mahdicv/mahdi Bruges0websit.mp4', // Changed from heroImage1
     heroImage2: 'mahdicv/mahdi2.jpg',
     profileVideo: 'mahdicv/mahdi Bruges0websit.mp4'
 };
@@ -78,23 +78,25 @@ async function loadMediaFromFirebase() {
 // Load other images in the background after the site is already visible
 async function loadOtherImagesLazily() {
     try {
-        // Load hero images in background
-        const heroImage1Ref = ref(storage, mediaFiles.heroImage1);
-        const heroImage1Url = await getDownloadURL(heroImage1Ref);
-        const heroImg1 = document.getElementById('heroImage1');
-        if (heroImg1) {
-            heroImg1.src = heroImage1Url;
+        // Load hero video in background
+        const heroVideo1Ref = ref(storage, mediaFiles.heroVideo1);
+        const heroVideo1Url = await getDownloadURL(heroVideo1Ref);
+        const heroVid1 = document.getElementById('heroVideo1');
+        if (heroVid1) {
+            heroVid1.querySelector('source').src = heroVideo1Url;
+            heroVid1.load(); // Reload the video element
         }
 
-        const heroImage2Ref = ref(storage, mediaFiles.heroImage2);
-        const heroImage2Url = await getDownloadURL(heroImage2Ref);
-        const heroImg2 = document.getElementById('heroImage2');
-        if (heroImg2) {
-            heroImg2.src = heroImage2Url;
+        // Load reel showcase video
+        const reelVideo = document.getElementById('reelVideo');
+        if (reelVideo) {
+            reelVideo.querySelector('source').src = heroVideo1Url; // Use same video
+            reelVideo.load(); // Reload the video element
         }
 
-        // Set up video to load only when clicked
-        setupVideoLazyLoading(heroImage1Url);
+
+        // Remove the old video setup since we're using reel showcase now
+        // setupVideoLazyLoading(heroVideo1Url); // Commented out
 
     } catch (error) {
         console.error('Error loading additional media:', error);
@@ -108,7 +110,7 @@ async function setupVideoLazyLoading(posterUrl) {
     const videoOverlay = document.querySelector('.video-overlay');
 
     if (video && videoOverlay) {
-        // Set poster image
+        // Set poster image 
         video.poster = posterUrl;
         
         // Load video only when user clicks
