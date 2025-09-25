@@ -22,7 +22,14 @@ const mediaFiles = {
     profileImage: 'mahdicv/mahdi.jpg',
     heroVideo1: 'mahdicv/mahdi Bruges0websit.mp4', // Changed from heroImage1
     heroImage2: 'mahdicv/mahdi2.jpg',
-    profileVideo: 'mahdicv/mahdi Bruges0websit.mp4'
+    profileVideo: 'mahdicv/mahdi Bruges0websit.mp4',
+    // Latest work images
+    work1: 'mahdicv/work1.jpg',
+    work2: 'mahdicv/work2.jpg',
+    work3: 'mahdicv/work3.jpg',
+    work4: 'mahdicv/work4.jpg',
+    work5: 'mahdicv/work5.jpg',
+    work6: 'mahdicv/work6.jpg'
 };
 
 // Loading screen management
@@ -97,6 +104,25 @@ async function loadOtherImagesLazily() {
 
         // Remove the old video setup since we're using reel showcase now
         // setupVideoLazyLoading(heroVideo1Url); // Commented out
+
+        // Load latest work images
+        const workImages = ['work1', 'work2', 'work3', 'work4', 'work5', 'work6'];
+        for (let i = 0; i < workImages.length; i++) {
+            try {
+                const workRef = ref(storage, mediaFiles[workImages[i]]);
+                const workUrl = await getDownloadURL(workRef);
+                const workImg = document.querySelector(`[data-work="${workImages[i]}"]`);
+                if (workImg) {
+                    workImg.src = workUrl;
+                }
+            } catch (error) {
+                console.log(`Work image ${workImages[i]} not found, using placeholder`);
+                // You can set a placeholder image here if needed
+            }
+        }
+        
+        // Initialize gallery after images are loaded
+        initializeGallery();
 
     } catch (error) {
         console.error('Error loading additional media:', error);
@@ -360,6 +386,163 @@ function initializeAnimations() {
         
         setTimeout(typeWriter, 1000);
     }
+}
+
+// Add gallery functionality - Fixed version
+function initializeGallery() {
+    // Wait for DOM to be ready
+    const galleryTrack = document.getElementById('galleryTrack');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+    
+    // Check if all elements exist
+    if (!galleryTrack || !prevBtn || !nextBtn) {
+        console.log('Gallery elements not found, retrying...');
+        setTimeout(initializeGallery, 500);
+        return;
+    }
+    
+    let currentIndex = 0;
+    let currentLightboxIndex = 0;
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    const itemWidth = 320; // 300px + 20px gap
+    let autoSlideInterval;
+    let isAnimating = false;
+    
+    console.log('Gallery initialized with', galleryItems.length, 'items');
+    
+    // Auto-slide functionality
+    function startAutoSlide() {
+        if (autoSlideInterval) clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(() => {
+            if (!isAnimating) {
+                currentIndex = (currentIndex + 1) % galleryItems.length;
+                updateGalleryPosition();
+            }
+        }, 3000);
+    }
+    
+    function stopAutoSlide() {
+        if (autoSlideInterval) {
+            clearInterval(autoSlideInterval);
+            autoSlideInterval = null;
+        }
+    }
+    
+    function updateGalleryPosition() {
+        if (isAnimating) return;
+        
+        isAnimating = true;
+        const translateX = -currentIndex * itemWidth;
+        galleryTrack.style.transform = `translateX(${translateX}px)`;
+        
+        // Reset animation flag after transition
+        setTimeout(() => {
+            isAnimating = false;
+        }, 500);
+        
+        console.log('Gallery moved to index:', currentIndex, 'translateX:', translateX);
+    }
+    
+    // Gallery navigation - Fixed
+    if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Previous button clicked');
+            stopAutoSlide();
+            currentIndex = currentIndex > 0 ? currentIndex - 1 : galleryItems.length - 1;
+            updateGalleryPosition();
+            setTimeout(startAutoSlide, 5000);
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Next button clicked');
+            stopAutoSlide();
+            currentIndex = (currentIndex + 1) % galleryItems.length;
+            updateGalleryPosition();
+            setTimeout(startAutoSlide, 5000);
+        });
+    }
+    
+    // Lightbox functionality
+    galleryItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            currentLightboxIndex = index;
+            const img = item.querySelector('img');
+            if (lightboxImage && img.src) {
+                lightboxImage.src = img.src;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    });
+    
+    function closeLightbox() {
+        if (lightbox) {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // Lightbox controls
+    if (lightboxClose) {
+        lightboxClose.addEventListener('click', closeLightbox);
+    }
+    
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+    }
+    
+    if (lightboxPrev) {
+        lightboxPrev.addEventListener('click', () => {
+            currentLightboxIndex = currentLightboxIndex > 0 ? currentLightboxIndex - 1 : galleryItems.length - 1;
+            const img = galleryItems[currentLightboxIndex].querySelector('img');
+            if (lightboxImage && img.src) {
+                lightboxImage.src = img.src;
+            }
+        });
+    }
+    
+    if (lightboxNext) {
+        lightboxNext.addEventListener('click', () => {
+            currentLightboxIndex = (currentLightboxIndex + 1) % galleryItems.length;
+            const img = galleryItems[currentLightboxIndex].querySelector('img');
+            if (lightboxImage && img.src) {
+                lightboxImage.src = img.src;
+            }
+        });
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (lightbox && lightbox.classList.contains('active')) {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft' && lightboxPrev) lightboxPrev.click();
+            if (e.key === 'ArrowRight' && lightboxNext) lightboxNext.click();
+        }
+    });
+    
+    // Start auto-slide
+    startAutoSlide();
+    
+    // Pause auto-slide on hover
+    if (galleryTrack) {
+        galleryTrack.addEventListener('mouseenter', stopAutoSlide);
+        galleryTrack.addEventListener('mouseleave', startAutoSlide);
+    }
+    
+    // Initial position
+    updateGalleryPosition();
 }
 
 // Notification system
