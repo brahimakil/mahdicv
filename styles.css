@@ -165,7 +165,7 @@ html {
     transition: var(--transition-smooth);
 }
 
-/* Hero Section - Modern Cinematic Design with White/Black/Yellow Mix */
+/* Hero Section - Fix text overlapping video */
 .hero {
     min-height: 100vh;
     display: flex;
@@ -191,13 +191,13 @@ html {
 
 .hero-content {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 300px minmax(0, 1fr);
     gap: 40px;
     align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    z-index: 2;
-    padding-left: 0;
+    max-width: 1100px; /* Reduced from 1200px to shift left */
+    margin: 0 0 0 50px; /* Changed from "0 auto" to push it to the left */
+    z-index: 10;
+    padding: 0 20px;
     position: relative;
 }
 
@@ -259,17 +259,17 @@ html {
 
 .title-main {
     display: block;
-    font-family: var(--font-primary);
+    font-family: 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
     font-size: 3.5rem;
-    font-weight: 700;
-    color: #1a1625;
-    background: linear-gradient(135deg, #1a1625, #d97706, #fbbf24);
+    font-weight: 600;
+    color: #fbbf24;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: 3px;
     margin-bottom: 10px;
-    text-shadow: none;
+    text-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
 .title-sub {
@@ -286,6 +286,9 @@ html {
     margin-bottom: 40px;
     line-height: 1.8;
     text-align: left;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
 }
 
 .hero-stats {
@@ -396,7 +399,7 @@ html {
     box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
 }
 
-/* Floating Images */
+/* Floating Images - Keep them BEHIND the content */
 .hero-images {
     position: absolute;
     top: 0;
@@ -404,7 +407,7 @@ html {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1;
+    z-index: 1; /* Lower z-index to stay BEHIND content */
 }
 
 .floating-image {
@@ -414,6 +417,7 @@ html {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     opacity: 0.9;
     border: 2px solid rgba(251, 191, 36, 0.3);
+    z-index: 1; /* Make sure it stays behind */
 }
 
 .floating-image img {
@@ -423,11 +427,12 @@ html {
     filter: grayscale(20%) contrast(1.1) brightness(0.95);
 }
 
+/* Move video more to the right */
 .floating-image-1 {
     width: 400px;
     height: 450px;
     top: 15%;
-    right: 6%;
+    right: 2%; /* Moved closer to the right edge */
     animation: float1 6s ease-in-out infinite;
 }
 
@@ -616,9 +621,6 @@ section {
 
 /* Remove old video-container styles since we're replacing with reel */
 /* Keep for backward compatibility but override with reel styles */
-.video-container {
-    display: none; /* Hide old video container */
-}
 
 .video-overlay {
     position: absolute;
@@ -1442,6 +1444,134 @@ section {
     100% { transform: rotate(360deg); }
 }
 
+/* Video Section within Latest Work - Yellow Theme */
+.video-showcase {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.video-showcase h3 {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 40px;
+    color: #1a1625;
+    background: linear-gradient(135deg, #d97706, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.video-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(251, 191, 36, 0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: var(--transition-smooth);
+    aspect-ratio: 16/9;
+}
+
+.video-container:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+.video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05));
+    color: #64748b;
+    font-size: 1.1rem;
+    text-align: center;
+    padding: 40px 20px;
+    position: relative;
+}
+
+.video-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(251, 191, 36, 0.3);
+    margin-bottom: 20px;
+}
+
+.video-placeholder::after {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-45%, -50%);
+    font-size: 2rem;
+    color: #1a1625;
+    z-index: 2;
+}
+
+.video-title {
+    margin-top: 100px;
+    font-family: var(--font-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1a1625;
+    margin-bottom: 8px;
+}
+
+.video-description {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(251, 191, 36, 0.1);
+    opacity: 0;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.video-container:hover .video-overlay {
+    opacity: 1;
+}
+
+.video-overlay i {
+    font-size: 3rem;
+    color: #fbbf24;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 /* Mobile responsive for lightbox */
 @media (max-width: 768px) {
     .lightbox-content {
@@ -1548,7 +1678,7 @@ section {
         background: var(--accent-bright);
     }
 
-    /* Hero Section Mobile */
+    /* Hero Section Mobile - CENTER EVERYTHING */
     .hero {
         padding: 100px 20px 60px;
         min-height: 90vh;
@@ -1558,15 +1688,24 @@ section {
         grid-template-columns: 1fr;
         text-align: center;
         gap: 40px;
+        max-width: 100%;
+        margin: 0 auto; /* Center on mobile */
+        padding: 0 20px;
     }
     
     .profile-image-container {
         width: 220px;
         height: 220px;
-        margin: 0 auto;
+        margin: 0 auto; /* Center the image */
     }
     
     .hero-right {
+        text-align: center; /* Center text */
+        padding: 0;
+        margin: 0 auto; /* Center the container */
+    }
+    
+    .hero-title {
         text-align: center;
     }
     
@@ -1582,11 +1721,11 @@ section {
     .hero-description {
         font-size: 1rem;
         margin-bottom: 30px;
-        text-align: center;
+        text-align: center; /* Center description */
     }
     
     .hero-stats {
-        justify-content: center;
+        justify-content: center; /* Center stats */
         gap: 20px;
         flex-wrap: wrap;
     }
@@ -1606,8 +1745,9 @@ section {
     
     .hero-actions {
         flex-direction: column;
-        align-items: center;
+        align-items: center; /* Center buttons */
         gap: 15px;
+        justify-content: center;
     }
     
     .btn {
@@ -1685,6 +1825,22 @@ section {
         font-size: 1rem;
     }
 
+    /* Responsive design for videos */
+    .video-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .video-showcase {
+        margin-top: 40px;
+        padding-top: 30px;
+    }
+    
+    .video-showcase h3 {
+        font-size: 1.6rem;
+        margin-bottom: 30px;
+    }
+
     /* Experience Section Mobile */
     .projects-grid {
         grid-template-columns: 1fr;
@@ -1757,7 +1913,7 @@ section {
     .form-group input,
     .form-group textarea {
         padding: 12px;
-        font-size: 16px; /* Prevents zoom on iOS */
+        font-size: 16px;
     }
 
     /* Footer Mobile */
