@@ -41,6 +41,16 @@
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    zoom: 100%; /* Force 100% zoom */
+}
+
+body {
+    font-family: var(--font-secondary);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 20%, #e2e8f0 40%, #cbd5e1 60%, #94a3b8 80%, #1a1625 100%);
+    color: var(--deep-umber-shadow);
+    line-height: 1.6;
+    overflow-x: hidden;
+    zoom: 100%; /* Force 100% zoom */
 }
 
 /* Loading Screen */
@@ -90,17 +100,17 @@ html {
     padding: var(--container-padding);
 }
 
-/* Header */
+/* Header - Change from purple gradient to black */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(88, 28, 135, 0.95) 100%);
+    background: rgba(0, 0, 0, 0.95); /* Black instead of purple */
     backdrop-filter: blur(15px);
     z-index: 1000;
     transition: var(--transition-smooth);
-    border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.2);
 }
 
 .nav {
@@ -117,7 +127,7 @@ html {
     font-family: var(--font-primary);
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--accent-bright);
+    color: #fbbf24; /* Yellow text on black */
     letter-spacing: 2px;
     text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
 }
@@ -130,7 +140,7 @@ html {
 
 .nav-menu a {
     text-decoration: none;
-    color: var(--aged-parchment);
+    color: #ffffff; /* White text */
     font-weight: 500;
     transition: var(--transition-smooth);
     position: relative;
@@ -143,12 +153,12 @@ html {
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--warm-faded-highlight), var(--accent-bright));
+    background: linear-gradient(90deg, #fbbf24, #f59e0b); /* Yellow underline */
     transition: var(--transition-smooth);
 }
 
-.nav-menu a:hover::after {
-    width: 100%;
+.nav-menu a:hover {
+    color: #fbbf24; /* Yellow on hover */
 }
 
 .nav-toggle {
@@ -160,7 +170,7 @@ html {
 .nav-toggle span {
     width: 25px;
     height: 3px;
-    background: var(--deep-umber-shadow);
+    background: #fbbf24; /* Yellow hamburger icon */
     margin: 3px 0;
     transition: var(--transition-smooth);
 }
